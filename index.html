@@ -87,17 +87,16 @@
 				meshes = [],
 				materials = [],
 
-				xgrid = 5,
-				ygrid = 5;
+				xgrid = 3,
+				ygrid = 3;
 				
 			var videoList = ['http://video-js.zencoder.com/oceans-clip.mp4', 'http://clips.vorwaerts-gmbh.de/VfE_html5.mp4'];
 			
 			var gui, voxelConfig = {
 				videoSrc: 'http://clips.vorwaerts-gmbh.de/VfE_html5.mp4',
 				videoIndex: 0,
-				gravityScale: 0.3,
-				timeScale: 1,
-				gravity: false
+				timeScale: 0.4,
+				physics: false
 			};
 
 			var system = jigLib.PhysicsSystem.getInstance();
@@ -118,12 +117,12 @@
 				
 				var ground = new jigLib.JPlane(null,[0, 0, 1, 0]);
 				ground.set_friction(5);
-				ground.moveTo([0,0,-10,0]);
+				ground.moveTo([0,0,0,0]);
 				system.addBody(ground);
 				
 				var ground = new jigLib.JPlane(null,[0, 1, 0, 0]);
 				ground.set_friction(10);
-				ground.moveTo([0,-170,0,0]);
+				ground.moveTo([0,-80,0,0]);
 				system.addBody(ground);
 				
 				camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 10000 );
@@ -150,14 +149,14 @@
 				renderer = new THREE.WebGLRenderer( { antialias: true } );
 				renderer.sortObjects = false;
 				renderer.setSize( window.innerWidth, window.innerHeight );
-				renderer.shadowCameraNear = 3;
-				renderer.shadowCameraFar = camera.far;
-				renderer.shadowCameraFov = 50;
-
-				renderer.shadowMapBias = 0.0039;
-				renderer.shadowMapDarkness = 0.5;
-				renderer.shadowMapWidth = 1024;
-				renderer.shadowMapHeight = 1024;
+				// renderer.shadowCameraNear = 3;
+				// 				renderer.shadowCameraFar = camera.far;
+				// 				renderer.shadowCameraFov = 50;
+				// 
+				// 				renderer.shadowMapBias = 0.0039;
+				// 				renderer.shadowMapDarkness = 0.5;
+				// 				renderer.shadowMapWidth = 1024;
+				// 				renderer.shadowMapHeight = 1024;
 				
 				container.appendChild( renderer.domElement );
 
@@ -211,7 +210,7 @@
 
 					mesh.position.x =   ( i - xgrid/2 ) * xsize;
 					mesh.position.y = - ( j - ygrid/2 ) * ysize;
-					mesh.position.z = i*j;
+					mesh.position.z = 0;
 
 					mesh.scale.x = mesh.scale.y = mesh.scale.z = 1;
 					mesh.matrixAutoUpdate = false;
@@ -230,9 +229,9 @@
 					
 					//JBox(skin, width, depth, height)
 					var voxelP = new jigLib.JBox(null, width, depth, height);
-					voxelP.set_mass(25);
-					voxelP.set_friction(50);
-					voxelP.set_restitution(50);
+					voxelP.set_mass(5);
+					voxelP.set_friction(250);
+					voxelP.set_restitution(0);
 					voxelP.moveTo([mesh.position.x, mesh.position.y, mesh.position.z, 0]);
 					voxelP.set_movable(true);
 					system.addBody(voxelP);
@@ -287,13 +286,13 @@
 					video.play();
 				});
 				
-				gui.add(voxelConfig, 'gravity').onChange( function(state){
-					system.setGravity( [0, 0, state ? -5.0 : 0, 0 ] );
+				gui.add(voxelConfig, 'physics').onChange( function(state){
+					usePhysics = state;
 				});
 				
-				gui.add(voxelConfig, 'gravityScale', 0.1, 1, 0.1).onChange(function(){
-					system.setGravity([0, 0, -9.8*voxelConfig.gravityScale, 0]);//-120
-				});
+				// gui.add(voxelConfig, 'gravityScale', 0.1, 1, 0.1).onChange(function(){
+				// 	system.setGravity([0, 0, -9.8*voxelConfig.gravityScale, 0]);//-120
+				// });
 				
 				gui.add(voxelConfig, 'timeScale', 0.1, 1, 0.1).onChange(function(){
 					timeScale = voxelConfig.timeScale;//-120
@@ -353,7 +352,7 @@
     		mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 			mouseX = ( event.clientX - windowHalfX );
 			mouseY = ( event.clientY - windowHalfY ) * 0.3;
-    		var vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
+    		var vector = new THREE.Vector3(mouse.x, mouse.y, 0);
    			projector.unprojectVector(vector, camera);
 
     		var ray = new THREE.Ray(camera.position, vector.subSelf(camera.position).normalize());
